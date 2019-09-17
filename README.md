@@ -7,16 +7,16 @@ Terraform module to create a keystore within S3/SSM
 | Name | Description | Type | Default | Required |
 |------|-------------|:----:|:-----:|:-----:|
 | backend | Specify which backend to store the keys and values: s3 or ssm | string | `"s3"` | no |
-| bucket\_name | Name of the keystore S3 bucket, must already exist. For SSM Parameter, bucket name will be used as prefix for the parameter names | string | `""` | no |
+| bucket\_name | Name of the keystore S3 bucket, must already exist. For SSM Parameter, bucket name will be used as prefix for the parameter names | string | `"null"` | no |
 | create\_keystore | Controls whether to create the keystore | string | `"true"` | no |
-| key\_value\_map | Map of keys and values | map | `<map>` | no |
+| key\_value\_map | Map of keys and values | map(string) | `<map>` | no |
 | kms\_key\_id | Specify the KMS key id or arn for encrypting SecureString. Only applicable for "ssm" backend | string | `""` | no |
-| tags | A map of tags to add to the keystore objects | map | `<map>` | no |
+| tags | A map of tags to add to the keystore objects | map(string) | `<map>` | no |
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
-| etags | List of ETags generated for each object in the keystore |
-| keys | List of keys created by the keystore module |
+| bucket\_objects | List of buckey objects created by the keystore module |
+| ssm\_parameters | List of ssm parameter objects created by the keystore module |
 
