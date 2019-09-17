@@ -1,7 +1,8 @@
-provider "aws" {}
+provider "aws" {
+}
 
 locals {
-  keys = "${keys(var.key_value_map)}"
+  keys = keys(var.key_value_map)
 
   #list of possible backend types support by the keystore module
   backends = [
@@ -10,33 +11,35 @@ locals {
   ]
 
   #test input backend provide by the users
-  is_backend_valid = "${contains(local.backends, var.backend)}"
+  is_backend_valid = contains(local.backends, var.backend)
 }
 
 resource "null_resource" "is_backend_valid" {
   # forces/outputs an error when var.backend is invalid
-  count = "${!local.is_backend_valid ? 1 : 0}"
+  count = local.is_backend_valid ? 1 : 0
 
-  "ERROR: var.backend (${var.backend}) is invalid. Must be one of: ${join(", ", local.backends)}" = true
+  triggers = {
+    assert_is_valid = local.is_backend_valid == false ? file("ERROR: ${var.backend}) is invalid. Must be one of: ${join(", ", local.backends)}") : null
+  }
 }
 
 resource "aws_s3_bucket_object" "this" {
-  count = "${var.create_keystore && var.backend == "s3" ? length(local.keys) : 0}"
+  for_each = var.backend == "s3" ? var.key_value_map : {}
 
-  bucket       = "${var.bucket_name}"
-  key          = "${local.keys[count.index]}"
-  content      = "${var.key_value_map[local.keys[count.index]]}"
+  bucket       = var.bucket_name
+  key          = each.key
+  content      = each.value
   content_type = "application/json"
-  etag         = "${md5(var.key_value_map[local.keys[count.index]])}"
-  tags         = "${var.tags}"
+  etag         = md5(each.value)
+  tags         = var.tags
 }
 
 resource "aws_ssm_parameter" "this" {
-  count = "${var.create_keystore && var.backend == "ssm" ? length(local.keys) : 0}"
+  for_each = var.backend == "ssm" ? var.key_value_map : {}
 
   type   = "SecureString"
-  name   = "${replace("/${var.bucket_name}/${local.keys[count.index]}","////", "/")}"
-  value  = "${var.key_value_map[local.keys[count.index]]}"
-  key_id = "${var.kms_key_id}"
-  tags   = "${var.tags}"
+  name   = replace("/${var.bucket_name}/${each.key}", "////", "/", )
+  value  = each.value
+  key_id = var.kms_key_id
+  tags   = var.tags
 }
