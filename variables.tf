@@ -1,5 +1,6 @@
 variable "create_keystore" {
   description = "Controls whether to create the keystore"
+  type        = bool
   default     = true
 }
 
@@ -27,6 +28,6 @@ variable "backend" {
 }
 
 variable "kms_key_id" {
-  default     = ""
   description = "Specify the KMS key id or arn for encrypting SecureString. Only applicable for \"ssm\" backend"
+  default     = ""
 }
