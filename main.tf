@@ -19,7 +19,7 @@ resource "null_resource" "is_backend_valid" {
   count = local.is_backend_valid ? 1 : 0
 
   triggers = {
-    assert_is_valid = local.is_backend_valid == false ? file("ERROR: ${var.backend}) is invalid. Must be one of: ${join(", ", local.backends)}") : null
+    assert_is_valid = local.is_backend_valid == false ? file("ERROR: var.backend (${var.backend}) is invalid. Must be one of: ${join(", ", local.backends)}") : null
   }
 }
 
